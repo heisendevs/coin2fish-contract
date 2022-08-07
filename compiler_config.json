@@ -2,6 +2,7 @@
 {
   "language": "Solidity",
   "settings": {
+    "viaIR": true,
     "metadata": {
       "useLiteralContent": true
     },
