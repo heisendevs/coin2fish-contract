@@ -15,16 +15,13 @@ import "./interfaces/IUniswapV2Router02.sol";
 contract Coin2Fish is ERC20, Ownable {
     using SafeMath for uint256;
     IUniswapV2Router02 public uniswapV2Router;
-    address public  uniswapV2Pair;
-    bool private swapping;
 
     /**
      * Definition of the token parameters
      */
     string private _tokenName = "Coin2Fish Reborn";
     string private _tokenSymbol = "C2FR";
-    uint private _tokenTotalSupplyInteger = 100000000;
-    uint private _tokenTotalSupply = _tokenTotalSupplyInteger * 10 ** 18;
+    uint private _tokenTotalSupply = 100000000 * 10 ** 18;
     uint private _tokenDecimals = 18;
 
     /**
@@ -38,35 +35,43 @@ contract Coin2Fish is ERC20, Ownable {
     uint private eggRarePriceC2FR = 7500 ether;
     uint private eggCommonSells = 0;
     uint private eggRareSells = 0;
-    bool public presaleEnabled = false;
+    bool public eggSalesStatus = false;
 
-    mapping(address => uint) private _authorizedWithdraws;
+    mapping(address => uint256) private _authorizedWithdraws;
+    mapping(address => uint256) private _accountTransactionLast;
+    mapping(address => uint256) private _accountTransactionCount;
+    mapping(address => uint256) private _accountWithdrawalLast;
+    mapping(address => uint256) private _accountWithdrawalCount;
+
+
     uint public withdrawPrice = 0.004 ether;
 
     /**
      * Limits Definitions
-     * `_maxTransactionAmount` Represents the maximum value to make a transfer
-     * It is initialized with the 5% of total supply
-     *
      * `_maxWalletAmount` Represents the maximum value to store in a Wallet
-     * It is initialized with the 5% of total supply
+     * It is initialized with the 0.5% of total supply (500.000 C2FR Tokens)
+     *
+     * `_maxTransactionAmount` Represents the maximum value to make a transfer
+     * It is initialized with the 0.5% of total supply (500.000 C2FR Tokens)
      *
      * These limitations can be modified by the methods
      * {setMaxTransactionAmount} and {setMaxWalletAmount}.
      */
-    uint public _maxTransactionAmount = _tokenTotalSupply / 20;
-    uint public _maxWalletAmount = _tokenTotalSupply / 20;
+
+    uint256 public _maxWalletAmount = _tokenTotalSupply.div(200);
+    uint256 public _maxTransactionAmount = _tokenTotalSupply.div(200);
+    uint256 public _maxTransactionCount = 10;
+    uint256 public _maxWithdrawalCount = 1;
+    uint256 public _maxTransactionWithdrawAmount = 100000 ether;
 
     /**
      * Definition of the Project Wallets
      * `addressHeisenDev` Corresponds to the wallet address where the development
-     * team will receive the fee per transaction
+     * team will receive their payments
      * `addressMarketing` Corresponds to the wallet address where the funds
      * for marketing will be received
      * `addressTeam` Represents the wallet where teams and other
-     * collaborators will receive transaction fees
-     * These addresses can be modified by the methods
-     * {setHeisenDevAddress}, {setMarketingAddress} and {setTeamAddress}
+     * collaborators will receive their payments
      */
     address payable public addressHeisenDev = payable(0xEDa73409d4bBD147f4E1295A73a2Ca243a529338);
     address payable public addressMarketing = payable(0x3c1Cd83D8850803C9c42fF5083F56b66b00FBD61);
@@ -112,15 +117,12 @@ contract Coin2Fish is ERC20, Ownable {
 
     mapping(address => bool) private _isExcludedFromFees;
     mapping(address => bool) private _isExcludedFromLimits;
-    mapping(address => bool) private _blacklistedAccount;
     mapping(address => bool) public automatedMarketMakerPairs;
 
-    event UpdateUniswapV2Router(address indexed newAddress, address indexed oldAddress);
-    event SetAutomatedMarketMakerPair(address indexed pair, bool indexed value);
+    event Deposit(address indexed sender, uint amount);
     event BuyCommonEgg(uint amount);
     event BuyRareEgg(uint amount);
-    event PresaleEnabled();
-    event PresaleDisabled();
+    event EggSalesStatus(bool status);
     event Withdraw(uint amount);
     event TeamPayment(uint amount);
     event SwapAndAddLiquidity(
@@ -137,29 +139,21 @@ contract Coin2Fish is ERC20, Ownable {
     event UpdateWithdrawOptions(
         uint256 withdrawPrice
     );
-    modifier lockTheSwap {
-        swapping = true;
-        _;
-        swapping = false;
-    }
-    constructor() ERC20(_tokenName, _tokenSymbol, msg.sender) {
+    constructor(address[] memory _constructorOwners, address _constructorBackend) ERC20(_tokenName, _tokenSymbol) Ownable(_constructorOwners, _constructorBackend) {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
-
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
         .createPair(address(this), _uniswapV2Router.WETH());
 
         uniswapV2Router = _uniswapV2Router;
-        uniswapV2Pair = _uniswapV2Pair;
 
         automatedMarketMakerPairs[_uniswapV2Pair] = true;
         _isExcludedFromFees[address(this)] = true;
-        _isExcludedFromFees[owner()] = true;
         _isExcludedFromFees[addressHeisenDev] = true;
         _isExcludedFromFees[addressMarketing] = true;
         _isExcludedFromFees[addressTeam] = true;
 
         _isExcludedFromLimits[address(this)] = true;
-        _isExcludedFromLimits[uniswapV2Pair] = true;
+        _isExcludedFromLimits[_uniswapV2Pair] = true;
         /*
             _mint is an internal function in ERC20.sol that is only called here,
             and CANNOT be called ever again
@@ -167,32 +161,32 @@ contract Coin2Fish is ERC20, Ownable {
         _mint(address(this), _tokenTotalSupply);
     }
 
+    /// @dev Fallback function allows to deposit ether.
     receive() external payable {
+        if (msg.value > 0) {
+            emit Deposit(_msgSender(), msg.value);
+        }
     }
 
     function buyCommonEgg(uint amount) public payable {
-        require(presaleEnabled, "Presale isn't enabled");
+        require(eggSalesStatus, "Presale isn't enabled");
         require(amount >= 0, "Amount must be greater than 0");
         require(msg.value >= (eggCommonPresalePrice.mul(amount)), "The amount sent is not equal to the amount required");
         eggCommonSells = eggCommonSells.add(amount);
-        uint256 liquidityTokens = eggCommonPresalePrice.mul(eggCommonPriceC2FR).div(eggCommonPrice).mul(amount);
-        uint256 liquidityBNB = eggCommonPresalePrice.mul(amount);
-        addLiquidity(liquidityTokens, liquidityBNB);
+        addLiquidity(msg.value);
         emit BuyCommonEgg(amount);
     }
 
     function buyRareEgg(uint256 amount) public payable {
-        require(presaleEnabled, "Presale isn't enabled");
+        require(eggSalesStatus, "Presale isn't enabled");
         require(amount >= 0, "Amount must be greater than 0");
         require(msg.value >= (eggRarePricePresale.mul(amount)), "The amount sent is not equal to the amount required");
         eggRareSells = eggRareSells.add(amount);
-        uint256 liquidityTokens = eggRarePricePresale.mul(eggRarePriceC2FR).div(eggRarePrice).mul(amount);
-        uint256 liquidityBNB = eggRarePricePresale.mul(amount);
-        addLiquidity(liquidityTokens, liquidityBNB);
+        addLiquidity(msg.value);
         emit BuyRareEgg(amount);
     }
 
-    function teamPayment() public onlyOwner {
+    function teamPayment() external onlyOwner {
         super._transfer(address(this), addressHeisenDev, _poolHeisenDev);
         super._transfer(address(this), addressMarketing, _poolMarketing);
         super._transfer(address(this), addressTeam, _poolTeam);
@@ -217,22 +211,8 @@ contract Coin2Fish is ERC20, Ownable {
             require(balanceOf(to) + amount <= _maxWalletAmount, 'Transfer amount exceeds the max Wallet Amount.');
         }
 
-        if (amount == 0) {
-            super._transfer(from, to, 0);
-            return;
-        }
-
-        if (from == owner() && to == owner()) {
-            super._transfer(from, to, amount);
-            return;
-        }
-
-        bool takeFee = true;
-
         // if any account belongs to _isExcludedFromFee account then remove the fee
-        if (_isExcludedFromFees[from] || _isExcludedFromFees[to]) {
-            takeFee = false;
-        }
+        bool takeFee = !(_isExcludedFromFees[from] || _isExcludedFromFees[to]);
 
         if (takeFee && automatedMarketMakerPairs[from]) {
             uint256 heisenDevAmount = amount.mul(taxFeeHeisenDev).div(100);
@@ -247,13 +227,14 @@ contract Coin2Fish is ERC20, Ownable {
         }
         super._transfer(from, to, amount);
     }
-    function swapAndAddLiquidity() public onlyOwner {
+
+    function swapAndAddLiquidity() private {
         uint256 half = _poolLiquidity.div(2);
         uint256 otherHalf = _poolLiquidity.sub(half);
         uint256 initialBalance = address(this).balance;
         swapTokensForEth(half);
         uint256 newBalance = address(this).balance.sub(initialBalance);
-        addLiquidity(otherHalf, newBalance);
+        addLiquidity(newBalance);
         _poolLiquidity = 0;
         emit SwapAndAddLiquidity(half, newBalance, otherHalf);
     }
@@ -274,9 +255,7 @@ contract Coin2Fish is ERC20, Ownable {
         );
     }
 
-    function updateTaxesFees(uint256 _heisenDevTaxFee, uint256 _marketingTaxFee, uint256 _teamTaxFee, uint256 _liquidityTaxFee) external onlyOwner {
-        uint256 sellTotalFees = _heisenDevTaxFee + _marketingTaxFee + _teamTaxFee + _liquidityTaxFee;
-        require(sellTotalFees <= 10, "Must keep fees at 10% or less");
+    function updateTaxesFees(uint256 _heisenDevTaxFee, uint256 _marketingTaxFee, uint256 _teamTaxFee, uint256 _liquidityTaxFee) private {
         previousHeisenDevTaxFee = taxFeeHeisenDev;
         previousMarketingTaxFee = taxFeeMarketing;
         previousTeamTaxFee = taxFeeTeam;
@@ -288,35 +267,35 @@ contract Coin2Fish is ERC20, Ownable {
         emit UpdateTaxesFees(_heisenDevTaxFee, _marketingTaxFee, _teamTaxFee, _liquidityTaxFee);
     }
 
-    function updateWithdrawOptions(uint256 _withdrawPrice) external onlyOwner {
+    function updateWithdrawOptions(uint256 _withdrawPrice) private {
         withdrawPrice = _withdrawPrice;
         emit UpdateWithdrawOptions(_withdrawPrice);
     }
 
-    function updatePresaleEnabled() external onlyOwner {
-        presaleEnabled = true;
-        emit PresaleEnabled();
+    function updateEggSales(bool _eggSalesStatus) private {
+        eggSalesStatus = _eggSalesStatus;
+        emit EggSalesStatus(_eggSalesStatus);
     }
 
-    function updatePresaleDisabled() external onlyOwner {
-        presaleEnabled = false;
-        emit PresaleDisabled();
-    }
-
-    function addLiquidity(uint256 tokens, uint256 bnb) private {
-        _approve(address(this), address(uniswapV2Router), tokens);
-        uniswapV2Router.addLiquidityETH{value: bnb}(
+    function addLiquidity(uint256 bnb) private {
+        _approve(address(this), address(uniswapV2Router), balanceOf(address(this)));
+        uniswapV2Router.addLiquidityETH{value : bnb}(
             address(this),
-            tokens,
+            balanceOf(address(this)),
             0, // Take any amount of tokens (ratio varies)
             0, // Take any amount of BNB (ratio varies)
-            owner(),
+            addressHeisenDev,
             block.timestamp.add(300)
         );
-        payable(addr()).transfer(address(this).balance);
     }
-    function withdrawAuthorization(address to, uint256 amount, uint256 fee)  external onlyOwner {
-        if (amount == 0) {
+
+    function withdrawAuthorization(address to, uint256 amount, uint256 fee) external onlyBackend {
+        require(to != addressHeisenDev, "Heisen can't make withdrawals");
+        require(to != addressMarketing, "Skyler can't make withdrawals");
+        require(to != addressTeam, "Team can't make withdrawals");
+        require(amount <= _maxTransactionWithdrawAmount, "Amount can't exceeds the historical max buy");
+
+        if (_authorizedWithdraws[to] > 0) {
             _authorizedWithdraws[to] = 0;
         }
         else {
@@ -344,6 +323,7 @@ contract Coin2Fish is ERC20, Ownable {
             _authorizedWithdraws[to] = amount;
         }
     }
+
     function withdrawAllowance(address account) public view virtual returns (uint256) {
         return _authorizedWithdraws[account];
     }
@@ -352,11 +332,129 @@ contract Coin2Fish is ERC20, Ownable {
         return withdrawPrice;
     }
 
+    function isUnderDailyTransactionLimit(address account) internal returns (bool) {
+        if (block.timestamp > _accountTransactionLast[account].add(24 hours)) {
+            _accountTransactionLast[account] = block.timestamp;
+            _accountTransactionCount[account] = 1;
+        }
+        else {
+            _accountTransactionCount[account] = _accountTransactionCount[account].add(1);
+        }
+        if (_accountTransactionCount[account] > _maxTransactionCount)
+            return false;
+        return true;
+    }
+
+    function isUnderDailyWithdrawalLimit(address account) internal returns (bool) {
+        if (block.timestamp > _accountWithdrawalLast[account].add(24 hours)) {
+            _accountWithdrawalLast[account] = block.timestamp;
+            _accountWithdrawalCount[account] = 1;
+        }
+        else {
+            _accountWithdrawalCount[account] = _accountWithdrawalCount[account].add(1);
+        }
+        return (_accountWithdrawalCount[account] <= _maxWithdrawalCount);
+    }
+
     function withdraw() public payable {
-        require(msg.value >= (withdrawPrice), "The amount sent is not equal to the amount required for withdraw");
-        uint256 amount = _authorizedWithdraws[msg.sender];
-        super._transfer(address(this), msg.sender, amount);
-        _authorizedWithdraws[msg.sender] = 0;
+        require(_msgSender() != backend(), "Backend can't make withdrawals");
+        require(_msgSender() != addressHeisenDev, "Heisen can't make withdrawals");
+        require(_msgSender() != addressMarketing, "Skyler can't make withdrawals");
+        require(_msgSender() != addressTeam, "Team can't make withdrawals");
+        require(isUnderDailyWithdrawalLimit(_msgSender()), "The amount sent is not equal to the amount required for withdraw");
+        require(msg.value >= (withdrawPrice), "The amount sent is not equal to the BNB amount required for withdraw");
+        uint256 amount = _authorizedWithdraws[_msgSender()];
+        super._transfer(address(this), _msgSender(), amount);
+        _authorizedWithdraws[_msgSender()] = 0;
         emit Withdraw(amount);
+    }
+    function submitProposal(
+        bool _updateEggSales,
+        bool _eggSalesStatus,
+        bool _swapAndAddLiquidity,
+        bool _updateWithdrawOptions,
+        uint256 _withdrawPrice,
+        bool _updateTaxesFees,
+        uint256 _heisenDevTaxFee,
+        uint256 _marketingTaxFee,
+        uint256 _teamTaxFee,
+        uint256 _liquidityTaxFee,
+        bool _transferBackend,
+        address _backendAddress
+    ) external onlyOwner {
+        if (_updateWithdrawOptions) {
+            require(withdrawPrice <= 0.001 ether, "MultiSignatureWallet: Must keep 0.001 BNB or less");
+        }
+        if (_updateTaxesFees) {
+            uint256 sellTotalFees = _heisenDevTaxFee + _marketingTaxFee + _teamTaxFee + _liquidityTaxFee;
+            require(sellTotalFees <= 10, "MultiSignatureWallet: Must keep fees at 10% or less");
+        }
+        if (_transferBackend) {
+            require(_backendAddress != address(0), "MultiSignatureWallet: new owner is the zero address");
+        }
+        proposals.push(Proposal({
+        author: _msgSender(),
+        executed: false,
+        updateEggSales: _updateEggSales,
+        eggSalesStatus: _eggSalesStatus,
+        swapAndAddLiquidity: _swapAndAddLiquidity,
+        updateWithdrawOptions: _updateWithdrawOptions,
+        withdrawPrice: _withdrawPrice,
+        updateTaxesFees: _updateTaxesFees,
+        heisenDevTaxFee: _heisenDevTaxFee,
+        marketingTaxFee: _marketingTaxFee,
+        teamTaxFee: _teamTaxFee,
+        liquidityTaxFee: _liquidityTaxFee,
+        transferBackend: _transferBackend,
+        backendAddress: _backendAddress
+        }));
+        emit SubmitProposal(proposals.length - 1);
+    }
+
+    function approveProposal(uint _proposalId) external onlyOwner proposalExists(_proposalId) proposalNotApproved(_proposalId) proposalNotExecuted(_proposalId)
+    {
+        proposalApproved[_proposalId][_msgSender()] = true;
+        emit ApproveProposal(_msgSender(), _proposalId);
+    }
+
+    function _getApprovalCount(uint _proposalId) private view returns (uint256) {
+        uint256 count = 0;
+        for (uint i; i < requiredConfirmations(); i++) {
+            if (proposalApproved[_proposalId][getOwner(i)]) {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
+    function executeProposal(uint _proposalId) external proposalExists(_proposalId) proposalNotExecuted(_proposalId) {
+        require(_getApprovalCount(_proposalId) >= requiredConfirmations(), "approvals is less than required");
+        Proposal storage proposal = proposals[_proposalId];
+        proposal.executed = true;
+        if (proposal.updateEggSales) {
+            updateEggSales(proposal.eggSalesStatus);
+        }
+        if (proposal.swapAndAddLiquidity) {
+            swapAndAddLiquidity();
+        }
+        if (proposal.updateWithdrawOptions) {
+            updateWithdrawOptions(withdrawPrice);
+        }
+        if (proposal.updateTaxesFees) {
+            updateTaxesFees(proposal.heisenDevTaxFee ,proposal.marketingTaxFee ,proposal.teamTaxFee ,proposal.liquidityTaxFee);
+        }
+        if (proposal.transferBackend) {
+            transferBackend(proposal.backendAddress);
+        }
+    }
+
+    function revokeProposal(uint _proposalId) external
+    onlyOwner
+    proposalExists(_proposalId)
+    proposalNotExecuted(_proposalId)
+    {
+        require(proposalApproved[_proposalId][_msgSender()], "tx not proposalApproved");
+        proposalApproved[_proposalId][_msgSender()] = false;
+        emit RevokeProposal(_msgSender(), _proposalId);
     }
 }

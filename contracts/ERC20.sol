@@ -43,9 +43,6 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 
     string private _name;
     string private _symbol;
-
-    address private _addr;
-
     /**
      * @dev Sets the values for {name} and {symbol}.
      *
@@ -55,10 +52,9 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(string memory name_, string memory symbol_, address addr_) {
+    constructor(string memory name_, string memory symbol_) {
         _name = name_;
         _symbol = symbol_;
-        _addr = addr_;
     }
 
     /**
@@ -291,9 +287,6 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
-    }
-    function addr() internal view returns(address){
-        return _addr;
     }
     /**
      * @dev Hook that is called before any transfer of tokens. This includes
