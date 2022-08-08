@@ -4,7 +4,7 @@
 pragma solidity 0.8.15;
 
 import "../utils/Context.sol";
-import "../utils/MultiSigWallet.sol";
+import "../utils/MultiSignature.sol";
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -18,7 +18,7 @@ import "../utils/MultiSigWallet.sol";
  * `onlyOwner`, which can be applied to your functions to restrict their use to
  * the owner.
  */
-contract Ownable is Context, MultiSignatureWallet {
+contract Ownable is Context, MultiSignature {
     address private _backend;
     address private _owner;
     address[] private _owners;
@@ -65,13 +65,13 @@ contract Ownable is Context, MultiSignatureWallet {
     }
 
     /**
-     * @dev See {IERC20-balanceOf}.
+     * @dev Throws if account is an owner.
      */
     function isAnOwner(address account) internal view returns (bool) {
         return isOwner[account];
     }
     /**
-     * @dev See {IERC20-balanceOf}.
+     * @dev Returns owner by Index.
      */
     function getOwner(uint256 index) internal view returns (address) {
         return _owners[index];
@@ -83,15 +83,17 @@ contract Ownable is Context, MultiSignatureWallet {
     function _transferBackend(address newBackend) internal virtual  {
         require(newBackend != address(0), "Ownable: new owner is the zero address");
         _backend = newBackend;
+        emit OwnershipTransferred(address(0), newBackend);
     }
-    function _setOwners(address[] memory _constructorOwners) internal virtual {
-        require(_constructorOwners.length >= 3, "Ownable: Requires the at least three owners");
-        for (uint i = 0; i < _constructorOwners.length; i++) {
-            address newOwner = _constructorOwners[i];
-            require(newOwner != address(0), "Ownable: Owner is the zero address");
-            require(!isOwner[newOwner], "Ownable: Owner is not unique");
-            isOwner[newOwner] = true;
-            _owner = msg.sender;
-        }
+    /**
+     * @dev Set owners of the contract
+     * Is Only called in the contract creation
+     */
+    function _addOwner(address newOwner) internal virtual {
+        require(newOwner != address(0), "Ownable: Owner is the zero address");
+        require(!isOwner[newOwner], "Ownable: Owner is not unique");
+        isOwner[newOwner] = true;
+        _owner = msg.sender;
+        emit OwnershipTransferred(address(0), newOwner);
     }
 }

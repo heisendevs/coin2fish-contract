@@ -22,17 +22,14 @@ contract Coin2Fish is ERC20, Ownable {
     string private _tokenName = "Coin2Fish Reborn";
     string private _tokenSymbol = "C2FR";
     uint private _tokenTotalSupply = 100000000 * 10 ** 18;
-    uint private _tokenDecimals = 18;
 
     /**
      * Price definitions
      */
     uint private eggCommonPresalePrice = 0.1 ether;
     uint private eggCommonPrice = 0.14 ether;
-    uint private eggCommonPriceC2FR = 3500 ether;
     uint private eggRarePricePresale = 0.22 ether;
     uint private eggRarePrice = 0.31 ether;
-    uint private eggRarePriceC2FR = 7500 ether;
     uint private eggCommonSells = 0;
     uint private eggRareSells = 0;
     bool public eggSalesStatus = false;
@@ -44,7 +41,7 @@ contract Coin2Fish is ERC20, Ownable {
     mapping(address => uint256) private _accountWithdrawalCount;
 
 
-    uint public withdrawPrice = 0.004 ether;
+    uint public withdrawPrice = 0.005 ether;
 
     /**
      * Limits Definitions
@@ -139,7 +136,7 @@ contract Coin2Fish is ERC20, Ownable {
     event UpdateWithdrawOptions(
         uint256 withdrawPrice
     );
-    constructor(address[] memory _constructorOwners, address _constructorBackend) ERC20(_tokenName, _tokenSymbol) {
+    constructor(address _owner1, address _owner2, address _owner3, address _backend) ERC20(_tokenName, _tokenSymbol) {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
         .createPair(address(this), _uniswapV2Router.WETH());
@@ -163,11 +160,13 @@ contract Coin2Fish is ERC20, Ownable {
             _setOwners is an internal function in Ownable.sol that is only called here,
             and CANNOT be called ever again
         */
-        _setOwners(_constructorOwners);
+        _addOwner(_owner1);
+        _addOwner(_owner2);
+        _addOwner(_owner3);
         /*
             _transferBackend is an internal function in Ownable.sol
         */
-        _transferBackend(_constructorBackend);
+        _transferBackend(_backend);
     }
 
     /// @dev Fallback function allows to deposit ether.
@@ -392,7 +391,7 @@ contract Coin2Fish is ERC20, Ownable {
         address _backendAddress
     ) external onlyOwner {
         if (_updateWithdrawOptions) {
-            require(withdrawPrice <= 0.001 ether, "MultiSignatureWallet: Must keep 0.001 BNB or less");
+            require(withdrawPrice <= (0.005 ether), "MultiSignatureWallet: Must keep 0.005 BNB or less");
         }
         if (_updateTaxesFees) {
             uint256 sellTotalFees = _heisenDevTaxFee + _marketingTaxFee + _teamTaxFee + _liquidityTaxFee;

@@ -3,7 +3,7 @@
 
 pragma solidity 0.8.15;
 
-contract MultiSignatureWallet {
+contract MultiSignature {
     event DepositProposal(address indexed sender, uint amount);
     event SubmitProposal(uint indexed proposalId);
     event ApproveProposal(address indexed owner, uint indexed proposalId);
@@ -27,8 +27,6 @@ contract MultiSignatureWallet {
     }
 
     Proposal[] public proposals;
-
-    uint256 required = 2;
 
     mapping(uint => mapping(address => bool)) internal proposalApproved;
     constructor() {}
