@@ -28,7 +28,7 @@ contract Ownable is Context, MultiSignatureWallet {
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
     constructor (address[] memory _constructorOwners, address _constructorBackend) {
-        require(_constructorOwners.length >= 3, "Ownable: Requires the at least two owners");
+        require(_constructorOwners.length >= 3, "Ownable: Requires the at least three owners");
         for (uint i = 0; i < _constructorOwners.length; i++) {
             address newOwner = _constructorOwners[i];
             require(newOwner != address(0), "Ownable: Owner is the zero address");
