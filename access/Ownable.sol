@@ -80,7 +80,7 @@ contract Ownable is Context, MultiSignature {
      * @dev Transfers backend Control of the contract to a new account (`newBackend`).
      * Can only be called by the current owner.
      */
-    function _transferBackend(address newBackend) internal virtual  {
+    function _transferBackend(address newBackend) internal  {
         require(newBackend != address(0), "Ownable: new owner is the zero address");
         _backend = newBackend;
         emit OwnershipTransferred(address(0), newBackend);
@@ -89,7 +89,7 @@ contract Ownable is Context, MultiSignature {
      * @dev Set owners of the contract
      * Is Only called in the contract creation
      */
-    function _addOwner(address newOwner) internal virtual {
+    function _addOwner(address newOwner) internal {
         require(newOwner != address(0), "Ownable: Owner is the zero address");
         require(!isOwner[newOwner], "Ownable: Owner is not unique");
         isOwner[newOwner] = true;

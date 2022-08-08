@@ -13,7 +13,7 @@ contract MultiSignature {
         address author;
         bool executed;
         bool updateEggSales;
-        bool eggSalesStatus;
+        bool eggSalesEnabled;
         bool swapAndAddLiquidity;
         bool updateWithdrawOptions;
         uint256 withdrawPrice;

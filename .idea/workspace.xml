@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a897cd1a-f7b3-4b7a-8e09-ac8570c40131" name="Changes" comment="workspace" />
+    <list default="true" id="a897cd1a-f7b3-4b7a-8e09-ac8570c40131" name="Changes" comment="workspace">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Coin2FishToken.sol" beforeDir="false" afterPath="$PROJECT_DIR$/Coin2FishToken.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Standard-JSON-input.json" beforeDir="false" afterPath="$PROJECT_DIR$/Standard-JSON-input.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/access/Ownable.sol" beforeDir="false" afterPath="$PROJECT_DIR$/access/Ownable.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/contracts/ERC20.sol" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/ERC20.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/solc-input-coin2fishtoken.json" beforeDir="false" afterPath="$PROJECT_DIR$/solc-input-coin2fishtoken.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/MultiSignature.sol" beforeDir="false" afterPath="$PROJECT_DIR$/utils/MultiSignature.sol" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,8 +31,25 @@
       <option name="project" value="LOCAL" />
       <updated>1659977462152</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="workspace">
+      <created>1659977686857</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1659977686857</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+      </list>
+    </option>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
