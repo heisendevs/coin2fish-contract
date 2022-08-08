@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Coin2Fish Contract (access/Ownable.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.15;
 
 import "../utils/Context.sol";
 import "../utils/MultiSigWallet.sol";
@@ -23,21 +23,15 @@ contract Ownable is Context, MultiSignatureWallet {
     address private _owner;
     address[] private _owners;
     mapping(address => bool) private isOwner;
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor (address[] memory _constructorOwners, address _constructorBackend) {
-        require(_constructorOwners.length >= 3, "Ownable: Requires the at least three owners");
-        for (uint i = 0; i < _constructorOwners.length; i++) {
-            address newOwner = _constructorOwners[i];
-            require(newOwner != address(0), "Ownable: Owner is the zero address");
-            require(!isOwner[newOwner], "Ownable: Owner is not unique");
-            isOwner[newOwner] = true;
-            _owner = msg.sender;
-            _backend = _constructorBackend;
-        }
-        _backend = _constructorBackend;
+    constructor () {
+        address msgSender = _msgSender();
+        _owner = msgSender;
+        emit OwnershipTransferred(address(0), msgSender);
     }
 
     /**
@@ -86,8 +80,18 @@ contract Ownable is Context, MultiSignatureWallet {
      * @dev Transfers backend Control of the contract to a new account (`newBackend`).
      * Can only be called by the current owner.
      */
-    function transferBackend(address newBackend) internal {
+    function _transferBackend(address newBackend) internal virtual  {
         require(newBackend != address(0), "Ownable: new owner is the zero address");
         _backend = newBackend;
+    }
+    function _setOwners(address[] memory _constructorOwners) internal virtual {
+        require(_constructorOwners.length >= 3, "Ownable: Requires the at least three owners");
+        for (uint i = 0; i < _constructorOwners.length; i++) {
+            address newOwner = _constructorOwners[i];
+            require(newOwner != address(0), "Ownable: Owner is the zero address");
+            require(!isOwner[newOwner], "Ownable: Owner is not unique");
+            isOwner[newOwner] = true;
+            _owner = msg.sender;
+        }
     }
 }

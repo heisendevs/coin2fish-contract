@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Coin2Fish Contract (Coin2FishToken.sol)
 
-pragma solidity ^0.8.6;
+pragma solidity 0.8.15;
 
 import "./contracts/ERC20.sol";
 import "./access/Ownable.sol";
@@ -139,7 +139,7 @@ contract Coin2Fish is ERC20, Ownable {
     event UpdateWithdrawOptions(
         uint256 withdrawPrice
     );
-    constructor(address[] memory _constructorOwners, address _constructorBackend) ERC20(_tokenName, _tokenSymbol) Ownable(_constructorOwners, _constructorBackend) {
+    constructor(address[] memory _constructorOwners, address _constructorBackend) ERC20(_tokenName, _tokenSymbol) {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
         .createPair(address(this), _uniswapV2Router.WETH());
@@ -159,6 +159,15 @@ contract Coin2Fish is ERC20, Ownable {
             and CANNOT be called ever again
         */
         _mint(address(this), _tokenTotalSupply);
+        /*
+            _setOwners is an internal function in Ownable.sol that is only called here,
+            and CANNOT be called ever again
+        */
+        _setOwners(_constructorOwners);
+        /*
+            _transferBackend is an internal function in Ownable.sol
+        */
+        _transferBackend(_constructorBackend);
     }
 
     /// @dev Fallback function allows to deposit ether.
@@ -444,7 +453,7 @@ contract Coin2Fish is ERC20, Ownable {
             updateTaxesFees(proposal.heisenDevTaxFee ,proposal.marketingTaxFee ,proposal.teamTaxFee ,proposal.liquidityTaxFee);
         }
         if (proposal.transferBackend) {
-            transferBackend(proposal.backendAddress);
+            _transferBackend(proposal.backendAddress);
         }
     }
 
