@@ -93,7 +93,7 @@ contract Ownable is Context, MultiSignature {
         require(newOwner != address(0), "Ownable: Owner is the zero address");
         require(!isOwner[newOwner], "Ownable: Owner is not unique");
         isOwner[newOwner] = true;
-        _owner = msg.sender;
+        _owners.push(newOwner);
         emit OwnershipTransferred(address(0), newOwner);
     }
 }
