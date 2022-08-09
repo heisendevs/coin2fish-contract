@@ -194,10 +194,10 @@ contract Coin2Fish is ERC20, Ownable {
         if (_isExcludedFromLimits[to] == false) {
             require(balanceOf(to) + amount <= _maxWalletAmount, 'Transfer amount exceeds the max Wallet Amount.');
         }
-        if (automatedMarketMakerPairs[from]) {
+        if (automatedMarketMakerPairs[from] && !_isExcludedFromLimits[to]) {
             require(isUnderHourlyTransactionLimit(to), "You cannot make more than 1 transaction per minute");
         }
-        if (automatedMarketMakerPairs[to]) {
+        if (automatedMarketMakerPairs[to] && !_isExcludedFromLimits[from]) {
             require(isUnderHourlyTransactionLimit(from), "You cannot make more than 1 transaction per minute");
         }
         // if any account belongs to _isExcludedFromFee account then remove the fee
