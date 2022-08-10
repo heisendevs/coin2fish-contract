@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts v4.4.1 (access/Ownable.sol)
+// Coin2Fish Contract (access/Ownable.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.15;
 
 import "../utils/Context.sol";
+import "../utils/MultiSignature.sol";
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -17,9 +18,11 @@ import "../utils/Context.sol";
  * `onlyOwner`, which can be applied to your functions to restrict their use to
  * the owner.
  */
-contract Ownable is Context {
+contract Ownable is Context, MultiSignature {
+    address private _backend;
     address private _owner;
-
+    address[] private _owners;
+    mapping(address => bool) private isOwner;
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
@@ -37,34 +40,60 @@ contract Ownable is Context {
     function owner() public view returns (address) {
         return _owner;
     }
-
+    function requiredConfirmations() internal view returns (uint256) {
+        return _owners.length;
+    }
+    /**
+     * @dev Returns the address of the current backend.
+     */
+    function backend() internal view returns (address) {
+        return _backend;
+    }
     /**
      * @dev Throws if called by any account other than the owner.
      */
     modifier onlyOwner() {
-        require(_owner == _msgSender(), "Ownable: caller is not the owner");
+        require(isOwner[_msgSender()],  "Ownable: caller is not an owner");
+        _;
+    }
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyBackend() {
+        require(backend() == _msgSender(), "Ownable: caller is not the backend");
         _;
     }
 
     /**
-     * @dev Leaves the contract without owner. It will not be possible to call
-     * `onlyOwner` functions anymore. Can only be called by the current owner.
-     *
-     * NOTE: Renouncing ownership will leave the contract without an owner,
-     * thereby removing any functionality that is only available to the owner.
+     * @dev Throws if account is an owner.
      */
-    function renounceOwnership() public virtual onlyOwner {
-        emit OwnershipTransferred(_owner, address(0));
-        _owner = address(0);
+    function isAnOwner(address account) internal view returns (bool) {
+        return isOwner[account];
     }
-
     /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * @dev Returns owner by Index.
+     */
+    function getOwner(uint256 index) internal view returns (address) {
+        return _owners[index];
+    }
+    /**
+     * @dev Transfers backend Control of the contract to a new account (`newBackend`).
      * Can only be called by the current owner.
      */
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
+    function _transferBackend(address newBackend) internal  {
+        require(newBackend != address(0), "Ownable: new owner is the zero address");
+        _backend = newBackend;
+        emit OwnershipTransferred(address(0), newBackend);
+    }
+    /**
+     * @dev Set owners of the contract
+     * Is Only called in the contract creation
+     */
+    function _addOwner(address newOwner) internal {
+        require(newOwner != address(0), "Ownable: Owner is the zero address");
+        require(!isOwner[newOwner], "Ownable: Owner is not unique");
+        isOwner[newOwner] = true;
+        _owners.push(newOwner);
+        emit OwnershipTransferred(address(0), newOwner);
     }
 }
