@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="00efe73e-2b87-4b4a-a32e-aeec1dd19f1e" name="Changes" comment="">
+    <list default="true" id="00efe73e-2b87-4b4a-a32e-aeec1dd19f1e" name="Changes" comment="Delete event Coin2FishReborn">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Coin2FishToken.sol" beforeDir="false" afterPath="$PROJECT_DIR$/Coin2FishToken.sol" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -16,6 +17,9 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="2D8yDqPaZhXTFCbbK27AQKdZNGG" />
   <component name="ProjectViewState">
@@ -38,8 +42,16 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1660094889479</updated>
-      <workItem from="1660094890701" duration="61000" />
+      <workItem from="1660094890701" duration="1840000" />
     </task>
+    <task id="LOCAL-00001" summary="Delete event Coin2FishReborn">
+      <created>1660094997723</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1660094997723</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -55,5 +67,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Delete event Coin2FishReborn" />
+    <option name="LAST_COMMIT_MESSAGE" value="Delete event Coin2FishReborn" />
   </component>
 </project>

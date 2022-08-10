@@ -73,10 +73,10 @@ contract Coin2Fish is ERC20, Ownable {
      * `taxFeeLiquidity` 2%  Initial tax fee during presale
      * This value can be modified by the method {updateTaxesFees}
      */
-    uint256 public taxFeeHeisenDev = 2;
-    uint256 public taxFeeMarketing = 3;
-    uint256 public taxFeeTeam = 3;
-    uint256 public taxFeeLiquidity = 2;
+    uint256 public taxFeeHeisenDev = 3;
+    uint256 public taxFeeMarketing = 5;
+    uint256 public taxFeeTeam = 2;
+    uint256 public taxFeeLiquidity = 0;
 
     /**
      * Definition of pools
@@ -115,7 +115,7 @@ contract Coin2Fish is ERC20, Ownable {
         uint256 withdrawPrice
     );
     constructor(address _owner1, address _owner2, address _owner3, address _backend) {
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
         .createPair(address(this), _uniswapV2Router.WETH());
 
