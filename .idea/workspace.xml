@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a897cd1a-f7b3-4b7a-8e09-ac8570c40131" name="Changes" comment="All mitigations OK">
-      <change beforePath="$PROJECT_DIR$/Standard-JSON-input.json" beforeDir="false" afterPath="$PROJECT_DIR$/Standard-JSON-input.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/solc-input-coin2fishtoken.json" beforeDir="false" afterPath="$PROJECT_DIR$/solc-input-coin2fishtoken.json" afterDir="false" />
+    <list default="true" id="00efe73e-2b87-4b4a-a32e-aeec1dd19f1e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Coin2FishToken.sol" beforeDir="false" afterPath="$PROJECT_DIR$/Coin2FishToken.sol" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,45 +12,38 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="crypto-alert-audit-mitigations" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="ProjectId" id="2D8yDqPaZhXTFCbbK27AQKdZNGG" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
-    <task id="LOCAL-00001" summary="workspace">
-      <created>1659977462152</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1659977462152</updated>
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="00efe73e-2b87-4b4a-a32e-aeec1dd19f1e" name="Changes" comment="" />
+      <created>1660094889479</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1660094889479</updated>
+      <workItem from="1660094890701" duration="61000" />
     </task>
-    <task id="LOCAL-00002" summary="workspace">
-      <created>1659977686857</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1659977686857</updated>
-    </task>
-    <task id="LOCAL-00003" summary="All mitigations OK">
-      <created>1659995541753</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1659995541753</updated>
-    </task>
-    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
-  <component name="Vcs.Log.History.Properties">
-    <option name="COLUMN_ID_ORDER">
-      <list>
-        <option value="Default.Root" />
-        <option value="Default.Author" />
-        <option value="Default.Date" />
-        <option value="Default.Subject" />
-      </list>
-    </option>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -63,10 +55,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="workspace" />
-    <MESSAGE value="All mitigations OK" />
-    <option name="LAST_COMMIT_MESSAGE" value="All mitigations OK" />
   </component>
 </project>

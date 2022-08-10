@@ -94,7 +94,6 @@ contract Coin2Fish is ERC20, Ownable {
     mapping(address => bool) private _isExcludedFromLimits;
     mapping(address => bool) private automatedMarketMakerPairs;
 
-    event Coin2FishReborn(uint amount);
     event Deposit(address indexed sender, uint amount);
     event BuyEgg();
     event EggSalesState(bool status);
@@ -146,7 +145,6 @@ contract Coin2Fish is ERC20, Ownable {
             and CANNOT be called ever again
         */
         _mint(address(this), _tokenTotalSupply);
-        emit Coin2FishReborn(_tokenTotalSupply);
     }
 
     /// @dev Fallback function allows to deposit ether.
