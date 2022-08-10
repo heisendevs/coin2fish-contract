@@ -116,7 +116,7 @@ contract Coin2Fish is ERC20, Ownable {
         uint256 withdrawPrice
     );
     constructor(address _owner1, address _owner2, address _owner3, address _backend) {
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
         .createPair(address(this), _uniswapV2Router.WETH());
 
