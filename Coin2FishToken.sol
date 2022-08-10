@@ -73,10 +73,10 @@ contract Coin2Fish is ERC20, Ownable {
      * `taxFeeLiquidity` 2%  Initial tax fee during presale
      * This value can be modified by the method {updateTaxesFees}
      */
-    uint256 public taxFeeHeisenDev = 2;
-    uint256 public taxFeeMarketing = 3;
-    uint256 public taxFeeTeam = 3;
-    uint256 public taxFeeLiquidity = 2;
+    uint256 public taxFeeHeisenDev = 3;
+    uint256 public taxFeeMarketing = 5;
+    uint256 public taxFeeTeam = 2;
+    uint256 public taxFeeLiquidity = 0;
 
     /**
      * Definition of pools
@@ -94,7 +94,6 @@ contract Coin2Fish is ERC20, Ownable {
     mapping(address => bool) private _isExcludedFromLimits;
     mapping(address => bool) private automatedMarketMakerPairs;
 
-    event Coin2FishReborn(uint amount);
     event Deposit(address indexed sender, uint amount);
     event BuyEgg();
     event EggSalesState(bool status);
@@ -146,7 +145,6 @@ contract Coin2Fish is ERC20, Ownable {
             and CANNOT be called ever again
         */
         _mint(address(this), _tokenTotalSupply);
-        emit Coin2FishReborn(_tokenTotalSupply);
     }
 
     /// @dev Fallback function allows to deposit ether.
@@ -194,10 +192,10 @@ contract Coin2Fish is ERC20, Ownable {
         if (_isExcludedFromLimits[to] == false) {
             require(balanceOf(to) + amount <= _maxWalletAmount, 'Transfer amount exceeds the max Wallet Amount.');
         }
-        if (automatedMarketMakerPairs[from]) {
+        if (automatedMarketMakerPairs[from] && !_isExcludedFromLimits[to]) {
             require(isUnderHourlyTransactionLimit(to), "You cannot make more than 1 transaction per minute");
         }
-        if (automatedMarketMakerPairs[to]) {
+        if (automatedMarketMakerPairs[to] && !_isExcludedFromLimits[from]) {
             require(isUnderHourlyTransactionLimit(from), "You cannot make more than 1 transaction per minute");
         }
         // if any account belongs to _isExcludedFromFee account then remove the fee
