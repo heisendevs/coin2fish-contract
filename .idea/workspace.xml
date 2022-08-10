@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="00efe73e-2b87-4b4a-a32e-aeec1dd19f1e" name="Changes" comment="Delete event Coin2FishReborn">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Coin2FishToken.sol" beforeDir="false" afterPath="$PROJECT_DIR$/Coin2FishToken.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Standard-JSON-input.json" beforeDir="false" afterPath="$PROJECT_DIR$/Standard-JSON-input.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/solc-input-coin2fishtoken.json" beforeDir="false" afterPath="$PROJECT_DIR$/solc-input-coin2fishtoken.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,18 +22,11 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="2D8yDqPaZhXTFCbbK27AQKdZNGG" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "vue.rearranger.settings.migration": "true"
-  }
-}]]></component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -67,6 +60,7 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Delete event Coin2FishReborn" />
