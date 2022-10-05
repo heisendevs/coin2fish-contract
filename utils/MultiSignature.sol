@@ -12,13 +12,13 @@ contract MultiSignature {
     struct Proposal {
         address author;
         bool executed;
-        bool updateEggSales;
-        bool eggSalesEnabled;
+        bool updateSalesStatus;
+        bool salesEnabled;
         bool swapAndAddLiquidity;
         bool updateWithdrawOptions;
         uint256 withdrawPrice;
         bool updateTaxesFees;
-        uint256 heisenDevTaxFee;
+        uint256 heisenVerseTaxFee;
         uint256 marketingTaxFee;
         uint256 teamTaxFee;
         uint256 liquidityTaxFee;

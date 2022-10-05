@@ -55,8 +55,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * construction.
      */
     constructor() {
-        _name = "Coin2Fish Reborn";
-        _symbol = "C2FR";
+        _name = "SwishFish";
+        _symbol = "SFH";
     }
 
     /**
