@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // SwishFish Contract (SwishFishToken.sol)
 
-pragma solidity 0.8.15;
+pragma solidity 0.8.17;
 
 import "./contracts/ERC20.sol";
 import "./access/Ownable.sol";
@@ -26,16 +26,13 @@ contract SwishFish is ERC20, Ownable {
 
 
     mapping(address => uint256) private _authorizedWithdraws;
-    mapping(address => uint256) private _accountTransactionLast;
-    mapping(address => uint256) private _accountTransactionCount;
     mapping(address => uint256) private _accountWithdrawalLast;
     mapping(address => uint256) private _accountWithdrawalCount;
 
 
     uint public withdrawPrice = 0.005 ether;
-    uint256 private _maxTransactionCount = 1;
     uint256 private _maxWithdrawalCount = 1;
-    uint256 private _maxTransactionWithdrawAmount = 100000 ether;
+    uint256 private _maxTransactionWithdrawAmount = 1000000 ether;
 
     /**
      * Definition of the Project Wallets
@@ -53,13 +50,13 @@ contract SwishFish is ERC20, Ownable {
 
     /**
      * Definition of the taxes fees for swaps
-     * `taxFeeHeisenDev` 2%  Initial tax fee during presale
+     * `taxFeeHeisenverse` 2%  Initial tax fee during presale
      * `taxFeeMarketing` 3%  Initial tax fee during presale
      * `taxFeeTeam` 3%  Initial tax fee during presale
      * `taxFeeLiquidity` 2%  Initial tax fee during presale
      * This value can be modified by the method {updateTaxesFees}
      */
-    uint256 public taxFeeHeisenDev = 2;
+    uint256 public taxFeeHeisenverse = 2;
     uint256 public taxFeeMarketing = 3;
     uint256 public taxFeeTeam = 3;
     uint256 public taxFeeLiquidity = 2;
@@ -92,7 +89,7 @@ contract SwishFish is ERC20, Ownable {
         uint256 bnb
     );
     event UpdateTaxesFees(
-        uint256 taxFeeHeisenDev,
+        uint256 taxFeeHeisenverse,
         uint256 taxFeeMarketing,
         uint256 taxFeeTeam,
         uint256 taxFeeLiquidity
@@ -101,7 +98,7 @@ contract SwishFish is ERC20, Ownable {
         uint256 withdrawPrice
     );
     constructor(address _owner1, address _owner2, address _owner3, address _backend) {
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
         .createPair(address(this), _uniswapV2Router.WETH());
 
@@ -115,6 +112,7 @@ contract SwishFish is ERC20, Ownable {
 
         _isExcludedFromLimits[address(this)] = true;
         _isExcludedFromLimits[_uniswapV2Pair] = true;
+        _isExcludedFromLimits[_backend] = true;
         /*
             _setOwners is an internal function in Ownable.sol that is only called here,
             and CANNOT be called ever again
@@ -213,7 +211,7 @@ contract SwishFish is ERC20, Ownable {
     }
 
     function updateTaxesFees(uint256 _heisenVerseTaxFee, uint256 _marketingTaxFee, uint256 _teamTaxFee, uint256 _liquidityTaxFee) private {
-        taxFeeHeisenDev = _heisenVerseTaxFee;
+        taxFeeHeisenverse = _heisenVerseTaxFee;
         taxFeeMarketing = _marketingTaxFee;
         taxFeeTeam = _teamTaxFee;
         taxFeeLiquidity = _liquidityTaxFee;
@@ -254,12 +252,12 @@ contract SwishFish is ERC20, Ownable {
         require(amount <= _maxTransactionWithdrawAmount, "Amount can't exceeds the max transaction withdraw amount");
 
         uint256 amountFee = amount.mul(fee).div(100);
-        uint256 totalTaxes = taxFeeHeisenDev + taxFeeMarketing + taxFeeTeam;
+        uint256 totalTaxes = taxFeeHeisenverse + taxFeeMarketing + taxFeeTeam;
         if (totalTaxes == 0) {
             _poolHeisenDev = _poolHeisenDev.add(amountFee);
         }
         else {
-            uint256 currentTaxFeeHeisenDev = taxFeeHeisenDev.mul(100).div(totalTaxes);
+            uint256 currentTaxFeeHeisenDev = taxFeeHeisenverse.mul(100).div(totalTaxes);
             uint256 currentTaxFeeMarketing = taxFeeMarketing.mul(100).div(totalTaxes);
             uint256 currentTaxFeeTeam = taxFeeTeam.mul(100).div(totalTaxes);
             uint256 heisenVerseAmount = amountFee.mul(currentTaxFeeHeisenDev).div(100);
@@ -375,6 +373,7 @@ contract SwishFish is ERC20, Ownable {
         }
         if (proposal.transferBackend) {
             _transferBackend(proposal.backendAddress);
+            _isExcludedFromLimits[proposal.backendAddress] = true;
         }
     }
 
