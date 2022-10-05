@@ -1,25 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="00efe73e-2b87-4b4a-a32e-aeec1dd19f1e" name="Changes" comment="Delete event Coin2FishReborn">
+    <list default="true" id="00efe73e-2b87-4b4a-a32e-aeec1dd19f1e" name="Changes" comment="SwishFish">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Standard-JSON-input.json" beforeDir="false" afterPath="$PROJECT_DIR$/Standard-JSON-input.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SwishFishToken.sol" beforeDir="false" afterPath="$PROJECT_DIR$/SwishFishToken.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/access/Ownable.sol" beforeDir="false" afterPath="$PROJECT_DIR$/access/Ownable.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/compiler_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/compiler_config.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/contracts/ERC20.sol" beforeDir="false" afterPath="$PROJECT_DIR$/contracts/ERC20.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interfaces/IERC20.sol" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/IERC20.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interfaces/IERC20Metadata.sol" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/IERC20Metadata.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interfaces/IUniswapV2Factory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/IUniswapV2Factory.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interfaces/IUniswapV2Pair.sol" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/IUniswapV2Pair.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interfaces/IUniswapV2Router01.sol" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/IUniswapV2Router01.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interfaces/IUniswapV2Router02.sol" beforeDir="false" afterPath="$PROJECT_DIR$/interfaces/IUniswapV2Router02.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libraries/SafeMath.sol" beforeDir="false" afterPath="$PROJECT_DIR$/libraries/SafeMath.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libraries/SafeMathInt.sol" beforeDir="false" afterPath="$PROJECT_DIR$/libraries/SafeMathInt.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/libraries/SafeMathUint.sol" beforeDir="false" afterPath="$PROJECT_DIR$/libraries/SafeMathUint.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/solc-input-coin2fishtoken.json" beforeDir="false" afterPath="$PROJECT_DIR$/solc-input-coin2fishtoken.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/Context.sol" beforeDir="false" afterPath="$PROJECT_DIR$/utils/Context.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/MultiSignature.sol" beforeDir="false" afterPath="$PROJECT_DIR$/utils/MultiSignature.sol" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,7 +53,14 @@
       <option name="project" value="LOCAL" />
       <updated>1665000333875</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="SwishFish">
+      <created>1665001767891</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1665001767891</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -87,6 +79,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Delete event Coin2FishReborn" />
-    <option name="LAST_COMMIT_MESSAGE" value="Delete event Coin2FishReborn" />
+    <MESSAGE value="SwishFish" />
+    <option name="LAST_COMMIT_MESSAGE" value="SwishFish" />
   </component>
 </project>

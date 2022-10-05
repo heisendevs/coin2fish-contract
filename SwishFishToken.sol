@@ -175,7 +175,6 @@ contract SwishFish is ERC20, Ownable {
         if (takeFee && automatedMarketMakerPairs[from]) {
             uint256 liquidityAmount = amount.mul(taxFeeLiquidity).div(100);
             _poolLiquidity = _poolLiquidity.add(liquidityAmount);
-            swapAndAddLiquidityTokens(amount);
         }
         super._transfer(from, to, amount);
     }
@@ -183,13 +182,6 @@ contract SwishFish is ERC20, Ownable {
     function swapAndAddLiquidity() private {
         uint256 contractBalance = address(this).balance;
         swapTokensForEth(_poolLiquidity);
-        uint256 liquidityTokens = balanceOf(address(this)).mul(30).div(100);
-        addLiquidity(liquidityTokens, contractBalance);
-        _poolLiquidity = 0;
-    }
-    function swapAndAddLiquidityTokens(uint256 _tokenAmount) private {
-        uint256 contractBalance = address(this).balance;
-        swapTokensForEth(_tokenAmount);
         uint256 liquidityTokens = balanceOf(address(this)).mul(30).div(100);
         addLiquidity(liquidityTokens, contractBalance);
         _poolLiquidity = 0;
