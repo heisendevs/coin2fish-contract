@@ -3,8 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="00efe73e-2b87-4b4a-a32e-aeec1dd19f1e" name="Changes" comment="SwishFish">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SwishFishToken.sol" beforeDir="false" afterPath="$PROJECT_DIR$/SwishFishToken.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/compiler_config_original.json" beforeDir="false" afterPath="$PROJECT_DIR$/compiler_config_original.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Standard-JSON-input.json" beforeDir="false" afterPath="$PROJECT_DIR$/Standard-JSON-input.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,7 +57,7 @@
       <workItem from="1667473866856" duration="636000" />
       <workItem from="1667478360214" duration="3312000" />
       <workItem from="1667750836808" duration="294000" />
-      <workItem from="1667760290388" duration="5478000" />
+      <workItem from="1667760290388" duration="5980000" />
     </task>
     <task id="LOCAL-00001" summary="Delete event Coin2FishReborn">
       <created>1665000333875</created>
@@ -95,7 +94,14 @@
       <option name="project" value="LOCAL" />
       <updated>1667941475285</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="SwishFish">
+      <created>1667942388055</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1667942388055</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
