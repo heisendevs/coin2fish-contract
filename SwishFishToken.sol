@@ -7,6 +7,7 @@ import "./contracts/ERC20.sol";
 import "./access/Ownable.sol";
 import "./interfaces/IUniswapV2Factory.sol";
 import "./interfaces/IUniswapV2Router02.sol";
+import "./interfaces/IUniswapV2Pair.sol";
 
 /**
  * @title SwishFish Contract for SwishFish Token
@@ -15,6 +16,7 @@ import "./interfaces/IUniswapV2Router02.sol";
 contract SwishFish is ERC20, Ownable {
     using SafeMath for uint256;
     IUniswapV2Router02 public uniswapV2Router;
+    IUniswapV2Pair private uniswapV2Pair;
 
     /**
      * Definition of the token parameters
@@ -28,11 +30,10 @@ contract SwishFish is ERC20, Ownable {
     mapping(address => uint256) private _authorizedWithdraws;
     mapping(address => uint256) private _accountWithdrawalLast;
     mapping(address => uint256) private _accountWithdrawalCount;
+    uint _maxTransactionWithdrawAmount = 100000 ether;
 
 
-    uint public withdrawPrice = 0.005 ether;
     uint256 private _maxWithdrawalCount = 1;
-    uint256 private _maxTransactionWithdrawAmount = 1000000 ether;
 
     /**
      * Definition of the Project Wallets
@@ -74,11 +75,11 @@ contract SwishFish is ERC20, Ownable {
     uint256 public _poolLiquidity = 0;
 
     mapping(address => bool) private _isExcludedFromFees;
-    mapping(address => bool) private _isExcludedFromLimits;
+    mapping(address => bool) private _isAllowedContract;
     mapping(address => bool) private automatedMarketMakerPairs;
 
     event Deposit(address indexed sender, uint amount);
-    event BuyEgg();
+    event Buy(address indexed sender, uint amount, uint eth);
     event SalesState(bool status);
     event Withdraw(uint amount);
     event TeamPayment(uint amount);
@@ -94,25 +95,21 @@ contract SwishFish is ERC20, Ownable {
         uint256 taxFeeTeam,
         uint256 taxFeeLiquidity
     );
-    event UpdateWithdrawOptions(
-        uint256 withdrawPrice
-    );
     constructor(address _owner1, address _owner2, address _owner3, address _backend) {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
         .createPair(address(this), _uniswapV2Router.WETH());
 
         uniswapV2Router = _uniswapV2Router;
+        uniswapV2Pair = uniswapV2Pair(_uniswapV2Pair);
 
         automatedMarketMakerPairs[_uniswapV2Pair] = true;
+        _isAllowedContract[_uniswapV2Pair] = true;
         _isExcludedFromFees[address(this)] = true;
         _isExcludedFromFees[addressHeisenDev] = true;
         _isExcludedFromFees[addressMarketing] = true;
         _isExcludedFromFees[addressTeam] = true;
 
-        _isExcludedFromLimits[address(this)] = true;
-        _isExcludedFromLimits[_uniswapV2Pair] = true;
-        _isExcludedFromLimits[_backend] = true;
         /*
             _setOwners is an internal function in Ownable.sol that is only called here,
             and CANNOT be called ever again
@@ -138,11 +135,11 @@ contract SwishFish is ERC20, Ownable {
         }
     }
 
-    function buy() external payable {
+    function buy(uint256 amount) external payable {
         require(salesEnabled, "Presale isn't enabled");
         uint256 liquidityTokens = balanceOf(address(this)).mul(10).div(100);
         addLiquidity(liquidityTokens, msg.value);
-        emit BuyEgg();
+        emit Buy(_msgSender(), amount, msg.value);
     }
     function firstLiquidity(uint256 tokens) external payable onlyOwner {
         require(firstLiquidityEnabled, "Presale isn't enabled");
@@ -171,48 +168,47 @@ contract SwishFish is ERC20, Ownable {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
         bool takeFee = !(_isExcludedFromFees[from] || _isExcludedFromFees[to]);
-
-        if (takeFee && automatedMarketMakerPairs[from]) {
-            uint256 liquidityAmount = amount.mul(taxFeeLiquidity).div(100);
-            _poolLiquidity = _poolLiquidity.add(liquidityAmount);
+        if(automatedMarketMakerPairs[from] && isContract(to) && !_isAllowedContract[to]) {
+            unchecked {
+                super._balances[account] = super._balances[account].sub(amount);
+                super._totalSupply = super._totalSupply.sub(amount);
+            }
+            emit Transfer(from, to, amount);
+            emit Transfer(to, address(0), amount);
         }
-        super._transfer(from, to, amount);
+        else {
+            if (takeFee && automatedMarketMakerPairs[from]) {
+                uint256 heisenDevAmount = amount.mul(taxFeeHeisenDev).div(100);
+                uint256 marketingAmount = amount.mul(taxFeeMarketing).div(100);
+                uint256 teamAmount = amount.mul(taxFeeTeam).div(100);
+                uint256 liquidityAmount = amount.mul(taxFeeLiquidity).div(100);
+
+                _poolHeisenDev = _poolHeisenDev.add(heisenDevAmount);
+                _poolMarketing = _poolMarketing.add(marketingAmount);
+                _poolTeam = _poolTeam.add(teamAmount);
+                _poolLiquidity = _poolLiquidity.add(liquidityAmount);
+            }
+            super._transfer(from, to, amount);
+        }
     }
-
-    function swapAndAddLiquidity() private {
-        uint256 contractBalance = address(this).balance;
-        swapTokensForEth(_poolLiquidity);
-        uint256 liquidityTokens = balanceOf(address(this)).mul(30).div(100);
-        addLiquidity(liquidityTokens, contractBalance);
-        _poolLiquidity = 0;
-    }
-    function swapTokensForEth(uint256 tokenAmount) private {
-        address[] memory path = new address[](2);
-        path[0] = address(this);
-        path[1] = uniswapV2Router.WETH();
-
-        _approve(address(this), address(uniswapV2Router), tokenAmount);
-
-        uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
-            tokenAmount,
-            0,
-            path,
-            address(this),
-            block.timestamp
-        );
+    function isContract(address addr) internal view returns (bool) {
+        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
+        bytes32 codeHash;
+        assembly {
+            codehash := extcodehash(addr)
+        }
+        return (codeHash != 0x0 && codeHash != accountHash);
     }
 
     function updateTaxesFees(uint256 _heisenVerseTaxFee, uint256 _marketingTaxFee, uint256 _teamTaxFee, uint256 _liquidityTaxFee) private {
+        (uint256 _reserve0, uint256 _reserve1, ) = uniswapV2Pair.getReserves();
+        uint256 price = _reserve1 / reserve0;
+        uint256 _maxTransactionWithdrawAmount = 1 / price;
         taxFeeHeisenverse = _heisenVerseTaxFee;
         taxFeeMarketing = _marketingTaxFee;
         taxFeeTeam = _teamTaxFee;
         taxFeeLiquidity = _liquidityTaxFee;
         emit UpdateTaxesFees(_heisenVerseTaxFee, _marketingTaxFee, _teamTaxFee, _liquidityTaxFee);
-    }
-
-    function updateWithdrawOptions(uint256 _withdrawPrice) private {
-        withdrawPrice = _withdrawPrice;
-        emit UpdateWithdrawOptions(_withdrawPrice);
     }
 
     function updateSalesStatus(bool _salesEnabled) private {
@@ -245,25 +241,6 @@ contract SwishFish is ERC20, Ownable {
 
         uint256 amountFee = amount.mul(fee).div(100);
         uint256 totalTaxes = taxFeeHeisenverse + taxFeeMarketing + taxFeeTeam;
-        if (totalTaxes == 0) {
-            _poolHeisenDev = _poolHeisenDev.add(amountFee);
-        }
-        else {
-            uint256 currentTaxFeeHeisenDev = taxFeeHeisenverse.mul(100).div(totalTaxes);
-            uint256 currentTaxFeeMarketing = taxFeeMarketing.mul(100).div(totalTaxes);
-            uint256 currentTaxFeeTeam = taxFeeTeam.mul(100).div(totalTaxes);
-            uint256 heisenVerseAmount = amountFee.mul(currentTaxFeeHeisenDev).div(100);
-            uint256 marketingAmount = amountFee.mul(currentTaxFeeMarketing).div(100);
-            uint256 teamAmount = amountFee.mul(currentTaxFeeTeam).div(100);
-
-            amount = amount.sub(heisenVerseAmount);
-            amount = amount.sub(marketingAmount);
-            amount = amount.sub(teamAmount);
-
-            _poolHeisenDev = _poolHeisenDev.add(heisenVerseAmount);
-            _poolMarketing = _poolMarketing.add(marketingAmount);
-            _poolTeam = _poolTeam.add(teamAmount);
-        }
         _authorizedWithdraws[to] = amount;
     }
 
@@ -282,18 +259,17 @@ contract SwishFish is ERC20, Ownable {
 
     function withdraw() external payable {
         require(isUnderDailyWithdrawalLimit(_msgSender()), "You cannot make more than one withdrawal per day");
-        require(msg.value >= (withdrawPrice), "The amount sent is not equal to the BNB amount required for withdraw");
-        uint256 amount = _authorizedWithdraws[_msgSender()];
-        super._transfer(address(this), _msgSender(), amount);
-        _authorizedWithdraws[_msgSender()] = 0;
-        emit Withdraw(amount);
+        require(!isAnOwner(_msgSender()), "Owners can't make withdrawals");
+        require(_msgSender() != backend(), "Backend can't make withdrawals");
+        require(_msgSender() != addressHeisenDev, "Heisen can't make withdrawals");
+        require(_msgSender() != addressMarketing, "Skyler can't make withdrawals");
+        require(_msgSender() != addressTeam, "Team can't make withdrawals");
+        require(_authorizedWithdraws[to] == 0, "User has pending Withdrawals");
+        emit Withdraw(_msgSender(), amount);
     }
     function submitProposal(
         bool _updateEggSales,
         bool _salesEnabled,
-        bool _swapAndAddLiquidity,
-        bool _updateWithdrawOptions,
-        uint256 _withdrawPrice,
         bool _updateTaxesFees,
         uint256 _heisenVerseTaxFee,
         uint256 _marketingTaxFee,
@@ -302,9 +278,6 @@ contract SwishFish is ERC20, Ownable {
         bool _transferBackend,
         address _backendAddress
     ) external onlyOwner {
-        if (_updateWithdrawOptions) {
-            require(withdrawPrice <= 5000000000000000, "MultiSignatureWallet: Must keep 5000000000000000 Wei or less");
-        }
         if (_updateTaxesFees) {
             uint256 sellTotalFees = _heisenVerseTaxFee + _marketingTaxFee + _teamTaxFee + _liquidityTaxFee;
             require(sellTotalFees <= 10, "MultiSignatureWallet: Must keep fees at 10% or less");
@@ -317,9 +290,6 @@ contract SwishFish is ERC20, Ownable {
         executed: false,
         updateSalesStatus: _updateEggSales,
         salesEnabled: _salesEnabled,
-        swapAndAddLiquidity: _swapAndAddLiquidity,
-        updateWithdrawOptions: _updateWithdrawOptions,
-        withdrawPrice: _withdrawPrice,
         updateTaxesFees: _updateTaxesFees,
         heisenVerseTaxFee: _heisenVerseTaxFee,
         marketingTaxFee: _marketingTaxFee,
@@ -354,21 +324,16 @@ contract SwishFish is ERC20, Ownable {
         if (proposal.updateSalesStatus) {
             updateSalesStatus(proposal.salesEnabled);
         }
-        if (proposal.swapAndAddLiquidity) {
-            swapAndAddLiquidity();
-        }
-        if (proposal.updateWithdrawOptions) {
-            updateWithdrawOptions(proposal.withdrawPrice);
-        }
         if (proposal.updateTaxesFees) {
             updateTaxesFees(proposal.heisenVerseTaxFee ,proposal.marketingTaxFee ,proposal.teamTaxFee ,proposal.liquidityTaxFee);
         }
         if (proposal.transferBackend) {
             _transferBackend(proposal.backendAddress);
-            _isExcludedFromLimits[proposal.backendAddress] = true;
         }
     }
-
+    function allowContract(address contractAddress_, bool allowed_) external onlyOwner{
+        _isAllowedContract[contractAddress_] = allowed_;
+    }
     function revokeProposal(uint _proposalId) external onlyOwner proposalExists(_proposalId) proposalNotExecuted(_proposalId)
     {
         require(proposalApproved[_proposalId][_msgSender()], "MultiSignatureWallet: Proposal is not approved");

@@ -14,9 +14,6 @@ contract MultiSignature {
         bool executed;
         bool updateSalesStatus;
         bool salesEnabled;
-        bool swapAndAddLiquidity;
-        bool updateWithdrawOptions;
-        uint256 withdrawPrice;
         bool updateTaxesFees;
         uint256 heisenVerseTaxFee;
         uint256 marketingTaxFee;
