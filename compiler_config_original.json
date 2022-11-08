@@ -31,6 +31,6 @@
         ]
       }
     },
-    "evmVersion": "byzantium"
+    "evmVersion": "constantinople"
   }
 }

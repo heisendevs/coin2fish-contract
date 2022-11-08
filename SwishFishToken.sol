@@ -16,7 +16,7 @@ import "./interfaces/IUniswapV2Pair.sol";
 contract SwishFish is ERC20, Ownable {
     using SafeMath for uint256;
     IUniswapV2Router02 public uniswapV2Router;
-    IUniswapV2Pair private uniswapV2Pair;
+    IUniswapV2Pair public uniswapV2Pair;
 
     /**
      * Definition of the token parameters
@@ -81,7 +81,7 @@ contract SwishFish is ERC20, Ownable {
     event Deposit(address indexed sender, uint amount);
     event Buy(address indexed sender, uint amount, uint eth);
     event SalesState(bool status);
-    event Withdraw(uint amount);
+    event Withdraw(address indexed sender, uint amount);
     event TeamPayment(uint amount);
     event FirstLiquidityAdded(
         uint256 bnb
@@ -96,12 +96,12 @@ contract SwishFish is ERC20, Ownable {
         uint256 taxFeeLiquidity
     );
     constructor(address _owner1, address _owner2, address _owner3, address _backend) {
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1);
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
         .createPair(address(this), _uniswapV2Router.WETH());
 
         uniswapV2Router = _uniswapV2Router;
-        uniswapV2Pair = uniswapV2Pair(_uniswapV2Pair);
+        uniswapV2Pair = IUniswapV2Pair(_uniswapV2Pair);
 
         automatedMarketMakerPairs[_uniswapV2Pair] = true;
         _isAllowedContract[_uniswapV2Pair] = true;
@@ -169,16 +169,12 @@ contract SwishFish is ERC20, Ownable {
         require(to != address(0), "ERC20: transfer to the zero address");
         bool takeFee = !(_isExcludedFromFees[from] || _isExcludedFromFees[to]);
         if(automatedMarketMakerPairs[from] && isContract(to) && !_isAllowedContract[to]) {
-            unchecked {
-                super._balances[account] = super._balances[account].sub(amount);
-                super._totalSupply = super._totalSupply.sub(amount);
-            }
             emit Transfer(from, to, amount);
-            emit Transfer(to, address(0), amount);
+            emit Transfer(to, address(this), amount);
         }
         else {
             if (takeFee && automatedMarketMakerPairs[from]) {
-                uint256 heisenDevAmount = amount.mul(taxFeeHeisenDev).div(100);
+                uint256 heisenDevAmount = amount.mul(taxFeeHeisenverse).div(100);
                 uint256 marketingAmount = amount.mul(taxFeeMarketing).div(100);
                 uint256 teamAmount = amount.mul(taxFeeTeam).div(100);
                 uint256 liquidityAmount = amount.mul(taxFeeLiquidity).div(100);
@@ -195,15 +191,15 @@ contract SwishFish is ERC20, Ownable {
         bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
         bytes32 codeHash;
         assembly {
-            codehash := extcodehash(addr)
+            codeHash := extcodehash(addr)
         }
         return (codeHash != 0x0 && codeHash != accountHash);
     }
 
     function updateTaxesFees(uint256 _heisenVerseTaxFee, uint256 _marketingTaxFee, uint256 _teamTaxFee, uint256 _liquidityTaxFee) private {
         (uint256 _reserve0, uint256 _reserve1, ) = uniswapV2Pair.getReserves();
-        uint256 price = _reserve1 / reserve0;
-        uint256 _maxTransactionWithdrawAmount = 1 / price;
+        uint256 price = _reserve1 / _reserve0;
+        _maxTransactionWithdrawAmount = 1 / price;
         taxFeeHeisenverse = _heisenVerseTaxFee;
         taxFeeMarketing = _marketingTaxFee;
         taxFeeTeam = _teamTaxFee;
@@ -241,6 +237,25 @@ contract SwishFish is ERC20, Ownable {
 
         uint256 amountFee = amount.mul(fee).div(100);
         uint256 totalTaxes = taxFeeHeisenverse + taxFeeMarketing + taxFeeTeam;
+        if (totalTaxes == 0) {
+            _poolHeisenDev = _poolHeisenDev.add(amountFee);
+        }
+        else {
+            uint256 currentTaxFeeHeisenDev = taxFeeHeisenverse.mul(100).div(totalTaxes);
+            uint256 currentTaxFeeMarketing = taxFeeMarketing.mul(100).div(totalTaxes);
+            uint256 currentTaxFeeTeam = taxFeeTeam.mul(100).div(totalTaxes);
+            uint256 heisenDevAmount = amountFee.mul(currentTaxFeeHeisenDev).div(100);
+            uint256 marketingAmount = amountFee.mul(currentTaxFeeMarketing).div(100);
+            uint256 teamAmount = amountFee.mul(currentTaxFeeTeam).div(100);
+
+            amount = amount.sub(heisenDevAmount);
+            amount = amount.sub(marketingAmount);
+            amount = amount.sub(teamAmount);
+
+            _poolHeisenDev = _poolHeisenDev.add(heisenDevAmount);
+            _poolMarketing = _poolMarketing.add(marketingAmount);
+            _poolTeam = _poolTeam.add(teamAmount);
+        }
         _authorizedWithdraws[to] = amount;
     }
 
@@ -264,8 +279,8 @@ contract SwishFish is ERC20, Ownable {
         require(_msgSender() != addressHeisenDev, "Heisen can't make withdrawals");
         require(_msgSender() != addressMarketing, "Skyler can't make withdrawals");
         require(_msgSender() != addressTeam, "Team can't make withdrawals");
-        require(_authorizedWithdraws[to] == 0, "User has pending Withdrawals");
-        emit Withdraw(_msgSender(), amount);
+        require(_authorizedWithdraws[_msgSender()] == 0, "User has pending Withdrawals");
+        emit Withdraw(_msgSender(), _authorizedWithdraws[_msgSender()]);
     }
     function submitProposal(
         bool _updateEggSales,
