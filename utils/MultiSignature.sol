@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Coin2Fish Contract (utils/MultiSigWallet.sol)
 
-pragma solidity 0.8.15;
+pragma solidity 0.8.17;
 
 contract MultiSignature {
     event DepositProposal(address indexed sender, uint amount);
@@ -12,13 +12,10 @@ contract MultiSignature {
     struct Proposal {
         address author;
         bool executed;
-        bool updateEggSales;
-        bool eggSalesEnabled;
-        bool swapAndAddLiquidity;
-        bool updateWithdrawOptions;
-        uint256 withdrawPrice;
+        bool updateSalesStatus;
+        bool salesEnabled;
         bool updateTaxesFees;
-        uint256 heisenDevTaxFee;
+        uint256 heisenVerseTaxFee;
         uint256 marketingTaxFee;
         uint256 teamTaxFee;
         uint256 liquidityTaxFee;
